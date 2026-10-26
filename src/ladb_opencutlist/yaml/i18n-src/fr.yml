@@ -1843,6 +1843,15 @@ tab:
       bbox_thickness: Épaisseur capable
       material: Matière
       tags: Badges
+      edges: Chants
+      edge_ymin: Chant Longueur 1
+      edge_ymax: Chant Longueur 2
+      edge_xmin: Chant Largeur 1
+      edge_xmax: Chant Largeur 2
+      edge_ymin_thickness: Épaisseur chant Longueur 1
+      edge_ymax_thickness: Épaisseur chant Longueur 2
+      edge_xmin_thickness: Épaisseur chant Largeur 1
+      edge_xmax_thickness: Épaisseur chant Largeur 2
     tooltip:
       errors: Cette pièce ne sera pas importée car elle contient les erreurs suivantes
       warnings: Cette pièce sera importée mais elle contient les avertissements suivants

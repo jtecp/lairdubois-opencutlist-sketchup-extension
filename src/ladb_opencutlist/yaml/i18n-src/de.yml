@@ -1843,6 +1843,15 @@ tab:
       bbox_thickness: Dicke
       material: Material
       tags: Badges
+      edges: Kantenbänder
+      edge_ymin: Kantenband Länge 1
+      edge_ymax: Kantenband Länge 2
+      edge_xmin: Kantenband Breite 1
+      edge_xmax: Kantenband Breite 2
+      edge_ymin_thickness: Kantendicke Länge 1
+      edge_ymax_thickness: Kantendicke Länge 2
+      edge_xmin_thickness: Kantendicke Breite 1
+      edge_xmax_thickness: Kantendicke Breite 2
     tooltip:
       errors: "Dieses Teil wird nicht importiert, weil es folgende Fehler enthält"
       warnings: "Dieses Teil wird importiert, aber es enthält folgende Fehler"

@@ -1843,6 +1843,15 @@ tab:
       bbox_thickness: Thickness
       material: Material
       tags: Badges
+      edges: Edges
+      edge_ymin: Edge Length 1
+      edge_ymax: Edge Length 2
+      edge_xmin: Edge Width 1
+      edge_xmax: Edge Width 2
+      edge_ymin_thickness: Edge thickness Length 1
+      edge_ymax_thickness: Edge thickness Length 2
+      edge_xmin_thickness: Edge thickness Width 1
+      edge_xmax_thickness: Edge thickness Width 2
     tooltip:
       errors: This part will not be imported because it produced the following errors
       warnings: This part will be imported but it produced the following warnings

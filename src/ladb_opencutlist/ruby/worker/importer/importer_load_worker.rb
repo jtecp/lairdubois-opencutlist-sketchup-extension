@@ -43,6 +43,50 @@ module Ladb::OpenCutList
             :align => 'left',
             :data_type => DATA_TYPE_STRING_ARRAY
         },
+        :edge_ymin => {
+            :align => 'left',
+            :data_type => DATA_TYPE_STRING,
+            :blank_allowed => true
+        },
+        :edge_ymax => {
+            :align => 'left',
+            :data_type => DATA_TYPE_STRING,
+            :blank_allowed => true
+        },
+        :edge_xmin => {
+            :align => 'left',
+            :data_type => DATA_TYPE_STRING,
+            :blank_allowed => true
+        },
+        :edge_xmax => {
+            :align => 'left',
+            :data_type => DATA_TYPE_STRING,
+            :blank_allowed => true
+        },
+        :edge_ymin_thickness => {
+            :align => 'right',
+            :data_type => DATA_TYPE_LENGTH,
+            :blank_allowed => true,
+            :zero_allowed => true
+        },
+        :edge_ymax_thickness => {
+            :align => 'right',
+            :data_type => DATA_TYPE_LENGTH,
+            :blank_allowed => true,
+            :zero_allowed => true
+        },
+        :edge_xmin_thickness => {
+            :align => 'right',
+            :data_type => DATA_TYPE_LENGTH,
+            :blank_allowed => true,
+            :zero_allowed => true
+        },
+        :edge_xmax_thickness => {
+            :align => 'right',
+            :data_type => DATA_TYPE_LENGTH,
+            :blank_allowed => true,
+            :zero_allowed => true
+        },
     }
 
     def initialize(
@@ -143,6 +187,14 @@ module Ladb::OpenCutList
                 :thickness => nil,
                 :material => nil,
                 :tags => nil,
+                :edge_ymin => nil,
+                :edge_ymax => nil,
+                :edge_xmin => nil,
+                :edge_xmax => nil,
+                :edge_ymin_thickness => nil,
+                :edge_ymax_thickness => nil,
+                :edge_xmin_thickness => nil,
+                :edge_xmax_thickness => nil,
                 :errors => [],
                 :warnings => [],
                 :raw_values => []
@@ -155,9 +207,14 @@ module Ladb::OpenCutList
               valid = false
 
               mapping = @column_mapping.key(i)
-              if value and mapping
+              column_info = mapping ? COLUMN_INFOS[mapping.to_sym] : nil
+              if column_info && column_info[:blank_allowed] && (value.nil? || value.strip.empty?)
 
-                column_info = mapping ? COLUMN_INFOS[mapping.to_sym] : nil
+                # Blank value is a valid "nothing" (e.g. no edge on this side)
+                valid = true
+
+              elsif value and mapping
+
                 if column_info
 
                   case column_info[:data_type]
@@ -172,7 +229,7 @@ module Ladb::OpenCutList
                   when DATA_TYPE_LENGTH
                     begin
                       length_value = DimensionUtils.d_to_ifloats(value).to_l
-                      valid = !value.empty? && length_value > 0
+                      valid = !value.empty? && (length_value > 0 || column_info[:zero_allowed] && length_value == 0)
                       value = length_value if valid
                     rescue => e
                       valid = false

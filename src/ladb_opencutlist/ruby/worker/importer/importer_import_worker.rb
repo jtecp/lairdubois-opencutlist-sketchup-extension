@@ -4,6 +4,8 @@ module Ladb::OpenCutList
 
     MATERIALS_PALETTE = %w(#4F78A7 #EF8E2C #DE545A #79B8B2 #5CA34D #ECCA48 #AE78A2 #FC9CA8 #9B755F #BAB0AC)
 
+    EDGE_SIDES = %i(ymin ymax xmin xmax)
+
     def initialize(parts,
 
                    remove_all: false,
@@ -109,6 +111,41 @@ module Ladb::OpenCutList
           end
         end
 
+        # Retrieve edge materials (or create them)
+        edge_materials = {}
+        EDGE_SIDES.each do |side|
+          next if part["edge_#{side}".to_sym].nil?
+          edge_material_name = part["edge_#{side}".to_sym].strip
+          edge_material = materials[edge_material_name]
+          unless edge_material
+            edge_material = materials.add(edge_material_name)
+            edge_material.color = MATERIALS_PALETTE[material_palette_index]
+            material_palette_index = (material_palette_index + 1) % MATERIALS_PALETTE.length
+          end
+          _setup_material_type(edge_material, MaterialAttributes::TYPE_EDGE, part["edge_#{side}_thickness".to_sym])
+          edge_materials.store(side, edge_material)
+        end
+
+        unless edge_materials.empty?
+
+          # OpenCutList detects edges only on sheet goods
+          _setup_material_type(material, MaterialAttributes::TYPE_SHEET_GOOD) if material
+
+          # Paint edge materials on side faces (length is on X axis, width on Y axis)
+          entities.grep(Sketchup::Face).each do |side_face|
+            center = side_face.bounds.center
+            if side_face.normal.parallel?(Y_AXIS)
+              side = center.y < part[:width] / 2.0 ? :ymin : :ymax
+            elsif side_face.normal.parallel?(X_AXIS)
+              side = center.x < part[:length] / 2.0 ? :xmin : :xmax
+            else
+              next
+            end
+            side_face.material = edge_materials[side] if edge_materials.has_key?(side)
+          end
+
+        end
+
         # Create definition instance(s)
         count = part[:count].nil? ? 1 : part[:count]
         for i in 0..count-1
@@ -157,6 +194,35 @@ module Ladb::OpenCutList
     end
 
     # -----
+
+    # Set the type of a not yet configured material, with the default attributes of this type
+    def _setup_material_type(material, type, thickness = nil)
+
+      material_attributes = MaterialAttributes.new(material)
+      return unless material_attributes.type == MaterialAttributes::TYPE_UNKNOWN
+
+      defaults = PLUGIN.get_global_preset(MaterialAttributes::DEFAULTS_DICTIONARY, nil, type)
+
+      material_attributes.type = type
+      material_attributes.thickness = thickness.nil? || thickness <= 0 ? defaults['thickness'] : DimensionUtils.to_ocl_precision_s(thickness)
+      material_attributes.length_increase = defaults['length_increase']
+      material_attributes.width_increase = defaults['width_increase']
+      material_attributes.thickness_increase = defaults['thickness_increase']
+      material_attributes.std_sections = defaults['std_sections']
+      material_attributes.std_lengths = defaults['std_lengths']
+      material_attributes.std_widths = defaults['std_widths']
+      material_attributes.std_thicknesses = defaults['std_thicknesses']
+      material_attributes.std_sizes = defaults['std_sizes']
+      material_attributes.grained = defaults['grained']
+      material_attributes.edge_decremented = defaults['edge_decremented']
+      material_attributes.raw_estimated = defaults['raw_estimated']
+      material_attributes.multiplier_coefficient = defaults['multiplier_coefficient']
+      material_attributes.std_volumic_masses = defaults['std_volumic_masses']
+      material_attributes.std_prices = defaults['std_prices']
+      material_attributes.std_cut_prices = defaults['std_cut_prices']
+      material_attributes.write_to_attributes
+
+    end
 
   end
 
